@@ -5,8 +5,6 @@ const userController = new UserController()
 const userRouter: Router = Router()
 
 userRouter.post('/', userController.createUser)
-
-// handled by clerk
-// userRouter.post("/login", checkBodyEmail(), checkBodyPwd(), loginAttempt);
+userRouter.post('/login', userController.logUser)
 
 export { userRouter }

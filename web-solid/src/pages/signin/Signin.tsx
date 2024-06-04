@@ -1,56 +1,14 @@
 import { Show, createSignal } from 'solid-js'
 import { Input, Button, Spinner } from '@/components'
 import { A, useNavigate } from '@solidjs/router'
-import { useFetchPost } from '../../libs/useFetch'
+import { fetchios } from '../../libs/fetchios'
 
 function Signin() {
     const [name, setName] = createSignal('')
+    const navigate = useNavigate()
     const [email, setEmail] = createSignal('')
     const [password, setPassword] = createSignal('')
-    const [isLoading, setIsLoading] = createSignal<boolean>(false)
-    const [isError, setIsError] = createSignal<boolean>(true)
-    const [error, setError] = createSignal<string>('')
-    const navigate = useNavigate()
-    const { data, mutate, refetch } = useFetchPost({
-        url: `${import.meta.env.VITE_URL}/users/`,
-        body: {
-            name: name(),
-            email: email(),
-            password: password(),
-        },
-    })
-    // async function handleSubmit() {
-    //   try {
-    //     setIsLoading(true);
-    //     setIsError(false);
-    //     const res = await fetch(`${import.meta.env.VITE_URL}/users/`, {
-    //       method: "POST",
-    //       body: JSON.stringify({
-    //         name: name(),
-    //         email: email(),
-    //         password: password(),
-    //       }),
-    //       headers: {
-    //         "Content-type": "application/json",
-    //       },
-    //     });
-    //     if (!res.ok) {
-    //       const response = await res.json();
-    //       setIsError(true);
-    //       setError(
-    //         response?.error?.name ? response.error?.name : "Invalid request"
-    //       );
-    //     } else {
-    //       const response: { uuid: string } = await res.json();
-    //       navigate(`/dashboard/${response.uuid}`);
-    //     }
-    //   } catch (error) {
-    //     setIsError(true);
-    //     setError("Something bad happened");
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // }
+
     return (
         <div class="w-full h-full flex flex-col">
             <div
@@ -67,7 +25,7 @@ function Signin() {
                     class="w-1/5 flex flex-col"
                     onSubmit={(e) => {
                         e.preventDefault()
-                        handleSubmit()
+                        mutate()
                     }}
                 >
                     <h2 class="self-center">SIGNIN</h2>

@@ -1,8 +1,10 @@
 import { Request, Response } from 'express'
 import { prisma } from '../prismaClient.js'
-import { errorHandler } from '../handlers/errorHandler.js'
+import { errorHandler, BaseError } from '../handlers/errorHandler.js'
 import { createUserPayload } from '../validators/userValidator.js'
+import Bcrypt from '../utils/bcrypt.js'
 
+const bcrypt = new Bcrypt()
 class UserController {
     async createUser(req: Request, res: Response) {
         try {
@@ -10,7 +12,7 @@ class UserController {
             const user = await prisma.user.create({
                 data: {
                     email: payload.email,
-                    password: payload.password,
+                    password: bcrypt.hashString(payload.password),
                 },
                 select: {
                     uuid: true,
@@ -26,17 +28,21 @@ class UserController {
     async logUser(req: Request, res: Response) {
         try {
             const payload = createUserPayload.parse(req.body)
-            const user = await prisma.user.create({
-                data: {
-                    email: payload.email,
-                    password: payload.password,
-                },
-                select: {
-                    uuid: true,
-                    email: true,
-                },
+            const user = await prisma.user.findUnique({
+                where: { email: payload.email },
             })
-            res.status(200).json(user)
+            if (!user) {
+                throw new BaseError(
+                    'User not found',
+                    404,
+                    'User does not exists'
+                )
+            }
+            if (!bcrypt.compareString(payload.password, user.password)) {
+                throw new BaseError('Invalid password', 401)
+            }
+            const { password, ...others } = user
+            res.status(200).json(others)
         } catch (error) {
             errorHandler(res, error)
         }
