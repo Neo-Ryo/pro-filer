@@ -1,54 +1,13 @@
-import { Show, createEffect, createResource, createSignal, on } from 'solid-js'
-import { useNavigate } from '@solidjs/router'
+import { Show, createSignal } from 'solid-js'
 import { A } from '@solidjs/router'
 import { Input, Button, Spinner } from '@/components'
-import { userContext } from '@/context/userContext'
-import { User } from '@/types/user.types'
-import { ResponseError, fetchios } from '@/libs/fetchios'
+import { useLogUser } from '@/api/user.post'
 
 function Login() {
     const [email, setEmail] = createSignal('')
     const [password, setPassword] = createSignal('')
-    const [loading, setLoading] = createSignal(false)
-    const [error, setError] = createSignal<string | null>(null)
-    const navigate = useNavigate()
-    const { user, setUser } = userContext()
-    async function logUser() {
-        try {
-            setError(null)
-            setLoading(true)
-            const res = await fetchios(
-                `${import.meta.env.VITE_URL}/users/login`,
-                {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        email: email(),
-                        password: password(),
-                    }),
-                    headers: {
-                        'Content-type': 'application/json',
-                    },
-                }
-            )
-            console.log(res)
-            setUser(await res.json())
-        } catch (error) {
-            if (error instanceof ResponseError) {
-                setError(error.name)
-            } else {
-                setError('Invalid Request')
-            }
-        } finally {
-            setLoading(false)
-        }
-    }
-    createEffect(
-        on(user, (u) => {
-            if (u) {
-                navigate(`/dashboard/${u.uuid}`)
-            }
-        })
-    )
+    const logUser = useLogUser()
+
     return (
         <div class="w-full h-full flex flex-col justify-center items-center">
             <div
@@ -66,7 +25,7 @@ function Login() {
                     class="w-1/5 flex flex-col"
                     onSubmit={(e) => {
                         e.preventDefault()
-                        logUser()
+                        logUser.mutate({ email: email(), password: password() })
                     }}
                 >
                     <div class="mt-4 mb-4">
@@ -77,7 +36,6 @@ function Login() {
                             type="email"
                             value={email()}
                             setter={setEmail}
-                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
                             errorValidityMessage="invalid email format"
                         />
                     </div>
@@ -94,12 +52,15 @@ function Login() {
                             errorValidityMessage="length between 8 to 32 character"
                         />
                     </div>
-                    <Show when={error()}>
-                        <p class="text-mainErr self-center">{error()}</p>
+                    <Show when={logUser.error}>
+                        <p class="text-mainErr self-center">
+                            {logUser.error?.name ?? 'Something went wrong...'}
+                        </p>
                     </Show>
                     <div class="self-end mt-4 mb-4">
                         <Show
-                            when={!loading()}
+                            when={!logUser.isPending}
+                            // when={!loading()}
                             fallback={
                                 <Button
                                     disabled={true}

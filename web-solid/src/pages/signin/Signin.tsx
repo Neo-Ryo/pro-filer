@@ -1,16 +1,15 @@
 import { Show, createSignal } from 'solid-js'
+import { A } from '@solidjs/router'
 import { Input, Button, Spinner } from '@/components'
-import { A, useNavigate } from '@solidjs/router'
-import { fetchios } from '../../libs/fetchios'
+import { useCreateUser } from '@/api/user.post'
 
 function Signin() {
-    const [name, setName] = createSignal('')
-    const navigate = useNavigate()
     const [email, setEmail] = createSignal('')
     const [password, setPassword] = createSignal('')
+    const createUser = useCreateUser()
 
     return (
-        <div class="w-full h-full flex flex-col">
+        <div class="w-full h-full flex flex-col justify-center items-center">
             <div
                 class="w-full h-40"
                 style={{
@@ -21,30 +20,17 @@ function Signin() {
                 }}
             />
             <div class="w-full flex flex-col justify-center items-center mt-24">
+                <h2>LOGIN</h2>
                 <form
                     class="w-1/5 flex flex-col"
                     onSubmit={(e) => {
                         e.preventDefault()
-                        mutate()
+                        createUser.mutate({
+                            email: email(),
+                            password: password(),
+                        })
                     }}
                 >
-                    <h2 class="self-center">SIGNIN</h2>
-                    <div class="mt-4 mb-4">
-                        <Input
-                            id="name"
-                            name="name"
-                            placeholder="Your name"
-                            type="text"
-                            value={name()}
-                            setter={setName}
-                            minLength={3}
-                            maxLength={20}
-                            errorValidityMessage={
-                                'length between 3 and 20 characters no special characters'
-                            }
-                            pattern="[A-Za-z\s]{1,25}"
-                        />
-                    </div>
                     <div class="mt-4 mb-4">
                         <Input
                             id="email"
@@ -53,7 +39,6 @@ function Signin() {
                             type="email"
                             value={email()}
                             setter={setEmail}
-                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
                             errorValidityMessage="invalid email format"
                         />
                     </div>
@@ -70,13 +55,16 @@ function Signin() {
                             errorValidityMessage="length between 8 to 32 character"
                         />
                     </div>
-                    <Show when={isError()}>
-                        <p class="text-mainErr self-center">{error()}</p>
+                    <Show when={createUser.error}>
+                        <p class="text-mainErr self-center">
+                            {createUser.error?.name ??
+                                'Something went wrong...'}
+                        </p>
                     </Show>
-                    <div class="flex mt-4 mb-4 justify-between">
-                        <A href="/">&#x2190; back</A>
+                    <div class="self-end mt-4 mb-4">
                         <Show
-                            when={!isLoading()}
+                            when={!createUser.isPending}
+                            // when={!loading()}
                             fallback={
                                 <Button
                                     disabled={true}
@@ -90,11 +78,14 @@ function Signin() {
                                 />
                             }
                         >
-                            <Button child={'SIGNIN'} type="submit" />
+                            <Button child={'LOGIN'} type="submit" />
                         </Show>
                     </div>
                 </form>
             </div>
+            <A href="/" class="text-primBtn hover:underline align-bottom">
+                Already have a n account?
+            </A>
         </div>
     )
 }
