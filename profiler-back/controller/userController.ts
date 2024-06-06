@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { prisma } from '../prismaClient.js'
 import { errorHandler, BaseError } from '../handlers/errorHandler.js'
-import { createUserPayload } from '../validators/userValidator.js'
+import { createUserPayload, getOneUserPayload } from '../validators/userValidator.js'
 import Bcrypt from '../utils/bcrypt.js'
 
 const bcrypt = new Bcrypt()
@@ -47,6 +47,23 @@ class UserController {
             errorHandler(res, error)
         }
     }
+
+    async getOneUser(req: Request, res: Response) {
+        try {
+            const { userUuid } = getOneUserPayload.parse(req.params)
+            const user = await prisma.user.findUniqueOrThrow({
+                where: { uuid: userUuid },
+                select: {
+                    email: true,
+                    uuid: true
+                }
+            })
+            res.status(200).json(user)
+        } catch (error) {
+            errorHandler(res, error)
+        }
+    }
+
 }
 
 export default UserController
