@@ -51,13 +51,16 @@ class UserController {
     async getOneUser(req: Request, res: Response) {
         try {
             const { userUuid } = getOneUserPayload.parse(req.params)
-            const user = await prisma.user.findUniqueOrThrow({
+            const user = await prisma.user.findUnique({
                 where: { uuid: userUuid },
                 select: {
                     email: true,
                     uuid: true
                 }
             })
+            if(!user){
+                throw new BaseError('User not found', 404)
+            }
             res.status(200).json(user)
         } catch (error) {
             errorHandler(res, error)

@@ -22,7 +22,7 @@ function Login() {
             <div class="w-full flex flex-col justify-center items-center mt-24">
                 <h2>LOGIN</h2>
                 <form
-                    class="w-1/5 flex flex-col"
+                    class="w-2/6 flex flex-col"
                     onSubmit={(e) => {
                         e.preventDefault()
                         logUser.mutate({ email: email(), password: password() })
