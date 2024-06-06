@@ -10,7 +10,7 @@ type LogUserBody = {
 }
 
 async function logUser(body: LogUserBody) {
-    return await fetchios(`${import.meta.env.VITE_URL}/users/login`, {
+    return await fetchios(`${import.meta.env.VITE_DB_URL}/users/login`, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {
@@ -19,8 +19,8 @@ async function logUser(body: LogUserBody) {
     })
 }
 
-async function createUser(body: LogUserBody) {
-    return await fetchios(`${import.meta.env.VITE_URL}/users`, {
+async function createUser(body: LogUserBody) {    
+    return await fetchios(`${import.meta.env.VITE_DB_URL}/users`, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {

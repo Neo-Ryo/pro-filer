@@ -20,7 +20,7 @@ function Signin() {
                 }}
             />
             <div class="w-full flex flex-col justify-center items-center mt-24">
-                <h2>LOGIN</h2>
+                <h2>SIGNIN</h2>
                 <form
                     class="w-1/5 flex flex-col"
                     onSubmit={(e) => {
